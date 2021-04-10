@@ -1,0 +1,232 @@
+﻿<UserControl x:Class="OrionLab.StressStrainCurveApplication.Views.HomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:config="clr-namespace:OrionLab.StressStrainCurveApplication.Configurations"
+             xmlns:cvrt="clr-namespace:OrionLab.StressStrainCurveApplication.Converters"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+            Width="1500"
+             Background="White">
+
+    <UserControl.Resources>
+        <cvrt:StringToDoubleConverter x:Key="DecimalConverter" />
+        <Style x:Key="AddDataBoxStyle" TargetType="{x:Type GroupBox}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName= StressStrainCurveModeRadioButton, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StressStrainCurveDataBox" TargetType="{x:Type Border}">
+            <Style.Triggers>
+
+                <DataTrigger  Binding="{Binding ElementName= StressStrainCurveModeRadioButton, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding ElementName=StressStrainCurveDataList, Path=Items.Count}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                
+                
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModulusDataBox" TargetType="{x:Type Border}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName= ModulusStressCurveModeRadioButton, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StressStrainCurveChartBoxStyle" TargetType="{x:Type Border}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName= StressStrainCurveModeRadioButton, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PoissonsRatioStressCurveChartBoxStyle" TargetType="{x:Type Border}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName= PoissonsRatioStressCurveModeRadioButton, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModulusStressCurveChartBoxStyle" TargetType="{x:Type Border}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName= ModulusStressCurveModeRadioButton, Path=IsChecked}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350" />
+            <ColumnDefinition Width="400" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0">
+            <StackPanel>
+
+                <GroupBox Header="Curve Fitting" Margin="0,0,0,5" Height="50">
+                    <StackPanel>
+                        <Slider Minimum="1" Maximum="10"  TickPlacement="BottomRight" SmallChange="1" IsSnapToTickEnabled="True"  Value="{Binding PolynomDegree}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Data Generation">
+                    <StackPanel>
+                        <Slider Minimum="1" Maximum="10"  TickPlacement="BottomRight" SmallChange="1" IsSnapToTickEnabled="True" Value="{Binding GeneratedDataNoise}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox>
+                    <StackPanel>
+                        <Button Content="Generate"  Command="{Binding GenerateDataCommand}" />
+                        <Button Content="Smooth"  Command="{Binding SmoothDataCommand}" />
+                        <Button Content="Cancel"  Command="{Binding ResetCommand}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Draw">
+                    <StackPanel>
+                        <CheckBox Content="Tangent" Command="{Binding DrawTangentCommand}" CommandParameter="{Binding IsChecked, RelativeSource={ RelativeSource Self}}" />
+                    </StackPanel>
+                </GroupBox>
+                <Border MinHeight="200" Margin="0,10,0,5" Style="{StaticResource StressStrainCurveDataBox}">
+                    <ListView x:Name="StressStrainCurveDataList" ItemsSource="{Binding Data}">
+
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Microstrain" DisplayMemberBinding="{Binding X}" />
+                                <GridViewColumn Header="Stress (MPa)" DisplayMemberBinding="{Binding Y}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Border>
+                <Border MinHeight="200" Margin="0,10,0,5" Style="{StaticResource ModulusDataBox}">
+                    <ListView>
+
+                        <ListView.View>
+                            <GridView>
+                               
+                                <GridViewColumn Header="Stress (MPa)"/>
+                                <GridViewColumn Header="E Tang (GPa)" />
+                                <GridViewColumn Header="E Sec (GPa)" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Border>
+            </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Margin="15,0,0,0">
+            <StackPanel>
+                <GroupBox Header="Charts">
+                    <StackPanel>
+                        <RadioButton x:Name="StressStrainCurveModeRadioButton"  Content="Stress / Strain Curve" Command="{Binding StressStrainCurveModeCommand}" />
+                        <RadioButton x:Name="PoissonsRatioStressCurveModeRadioButton" Content="Poisson's Ratio (v) / Stress Curve" Command="{Binding PoissonsRatioStressCurveModeCommand}" />
+                        <RadioButton x:Name="ModulusStressCurveModeRadioButton" Content="Modulus (E) / Stress Curve" Command="{Binding ModulusStressCurveModeCommand}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Input Data" Padding="5" Style="{StaticResource AddDataBoxStyle}">
+                    <StackPanel>
+                        <Label Content="Microstrain" />
+                        <TextBox  Text="{Binding InputMicrostrain ,Converter= {StaticResource DecimalConverter}}" />
+                        <Label Content="Stress" />
+                        <TextBox Text="{Binding InputStress , Converter= {StaticResource DecimalConverter}}" />
+                        <Button Content="Add"  Margin="0,10,0,0" Command="{Binding AddDataCommand}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Edit Data" Padding="5" Margin="0,10,0,0">
+                    <StackPanel>
+                        <Label Content="Microstrain" />
+                        <TextBox Text="{Binding EditMicrostrain}" />
+                        <Label Content="Stress" />
+                        <TextBox Text="{Binding EditStress}" />
+                        <Button Content="Update" Margin="0,10,0,0" />
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Border>
+        <Border Grid.Column="2">
+            <!--<ContentControl prism:RegionManager.RegionName="{Binding Source={x:Static config:Regions.ChartRegion}}" />-->
+
+            <Grid>
+
+                <Border x:Name="StressStrainCurveChartBox" Style="{StaticResource StressStrainCurveChartBoxStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Stress / Strain Curve" HorizontalAlignment="Center" FontSize="22"/>
+                        <lvc:CartesianChart Grid.Row="1" Name="Chart"  Series="{Binding StressStrainCurveSeries}"  LegendLocation="Right" DataClickCommand="{Binding EditDataCommand}" MouseMove="Chart_MouseMove">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseDoubleClick">
+                                    <i:InvokeCommandAction  Command="{Binding MouseDoubleClickCommand}" />
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="MouseMove">
+                                    <i:InvokeCommandAction  Command="{Binding MouseMoveCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Title="Stress (MPa)" FontSize="18" />
+                            </lvc:CartesianChart.AxisY>
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Title="Microstrain" FontSize="18" />
+                            </lvc:CartesianChart.AxisX>
+                        </lvc:CartesianChart>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="PoissonsRationStressCurveChartBox" Style="{StaticResource PoissonsRatioStressCurveChartBoxStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Poisson's Ratio (v)/ Stress Curve" HorizontalAlignment="Center" FontSize="22"/>
+                        <lvc:CartesianChart Grid.Row="1" Name="PoissonsRatioChart"   LegendLocation="Right">
+                           
+
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Title="Poisson's Ratio (v)" FontSize="18" />
+                            </lvc:CartesianChart.AxisY>
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Title="Stress (MPa)" FontSize="18" />
+                            </lvc:CartesianChart.AxisX>
+                        </lvc:CartesianChart>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="ModulusStressCurveChartBox" Style="{StaticResource ModulusStressCurveChartBoxStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Modulus (E) / Stress Curve" HorizontalAlignment="Center" FontSize="22"/>
+                        <lvc:CartesianChart Grid.Row="1" Name="ModulusRatioChart"   LegendLocation="Right">
+
+
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Title="Modulus (E) (GPa)" FontSize="18" />
+                            </lvc:CartesianChart.AxisY>
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Title="Stress (MPa)" FontSize="18" />
+                            </lvc:CartesianChart.AxisX>
+                        </lvc:CartesianChart>
+                    </Grid>
+                </Border>
+            </Grid>
+            
+        </Border>
+    </Grid>
+</UserControl>
